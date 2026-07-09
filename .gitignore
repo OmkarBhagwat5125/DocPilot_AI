@@ -7,3 +7,6 @@ qdrant_db/
 uploads/
 dist/
 .vite/
+# Logs
+*.log
+backend_stderr.log
