@@ -1,0 +1,8 @@
+                 0.1:12324 - "GET / HTTP/1.1" 200 OK
+ INFO:     127.0.0.1:43607 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43607 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:29049 - "OPTIONS /api/documents HTTP/1.1" 200 OK
+INFO:     127.0.0.1:29049 - "GET /api/documents HTTP/1.1" 200 OK
+INFO:     127.0.0.1:23129 - "OPTIONS /api/query HTTP/1.1" 200 OK
+INFO:     127.0.0.1:23129 - "POST /api/query HTTP/1.1" 200 OK
+               

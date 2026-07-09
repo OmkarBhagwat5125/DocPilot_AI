@@ -1,0 +1,9 @@
+# DocPilot AI
+node_modules/
+__pycache__/
+*.pyc
+.env
+qdrant_db/
+uploads/
+dist/
+.vite/
