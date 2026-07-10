@@ -6,7 +6,6 @@ A full-stack document intelligence platform built with FastAPI, React, and RAG (
 
 ## Architecture
 
-```
 User uploads file  ──►  Parse (PDF/DOCX/PPTX/CSV/TXT)
                     ──►  Chunk (RecursiveCharacterTextSplitter)
                     ──►  Embed (BGE-small-en-v1.5, 384-dim)
@@ -16,7 +15,6 @@ User uploads file  ──►  Parse (PDF/DOCX/PPTX/CSV/TXT)
 User asks question ──►  Embed question
                     ──►  Vector search in Qdrant (user-scoped)
                     ──►  Gemini 2.5 Flash generates answer with citations
-```
 
 ## Tech Stack
 
