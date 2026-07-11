@@ -5,7 +5,6 @@
 **Stack:**
 - **Frontend:** React 19 + Vite, Supabase Auth
 - **Backend:** FastAPI + Uvicorn
-- **LLM:** Gemini 2.5 Flash
 - **Vector DB:** Qdrant
 - **Storage/Auth:** Supabase
 
