@@ -4,7 +4,7 @@
 
 **Stack:**
 - **Frontend:** React 19 + Vite, Supabase Auth
-- **Backend:** FastAPI + Uvicorn
+- **Backend:** FastAPI
 - **Vector DB:** Qdrant
 - **Storage/Auth:** Supabase
 
