@@ -132,7 +132,7 @@ async def query_documents(
         # 2. Search Qdrant for user's documents (top 5 results)
         relevant_chunks = vector_db.search(query_vector, user_id, top_k=5)
         
-        # 3. Generate answer using Gemini
+        # 3. Generate answer using Groq
         res = chat_service.generate_answer(question, relevant_chunks)
         
         return QueryResponse(
