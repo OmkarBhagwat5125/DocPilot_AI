@@ -66,9 +66,12 @@ async def upload_document(
         # Read file contents
         content = await file.read()
         
-        # 1. Upload to Supabase Storage first for cloud permanence
-        object_storage.upload_file(user_id, filename, content)
-        
+        # 1. Upload to Supabase Storage first for cloud permanence (fallback gracefully if keys are invalid)
+        try:
+            object_storage.upload_file(user_id, filename, content)
+        except Exception as upload_err:
+            logger.warning(f"Supabase storage upload failed: {str(upload_err)}. Fallback to local parsing and vector indexing.")
+            
         # 2. Save locally temporarily to allow parser to access it via path
         with open(temp_file_path, "wb") as f:
             f.write(content)
@@ -133,7 +136,7 @@ async def query_documents(
         relevant_chunks = vector_db.search(query_vector, user_id, top_k=5)
         
         # 3. Generate answer using Groq
-        res = chat_service.generate_answer(question, relevant_chunks)
+        res = await chat_service.generate_answer(question, relevant_chunks)
         
         return QueryResponse(
             answer=res["answer"],

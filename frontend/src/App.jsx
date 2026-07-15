@@ -141,6 +141,8 @@ export default function App() {
 
   return (
     <div className="app-container">
+      <div className="bg-glow orb-1"></div>
+      <div className="bg-glow orb-2"></div>
       <Sidebar
         documents={documents}
         onUpload={handleUpload}

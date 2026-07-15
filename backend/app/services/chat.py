@@ -1,5 +1,6 @@
 import logging
-from groq import Groq
+from groq import AsyncGroq
+from tenacity import retry, stop_after_attempt, wait_exponential
 from backend.app.core.config import settings
 
 logger = logging.getLogger(__name__)
@@ -10,13 +11,25 @@ class ChatService:
         self.model_name = settings.GROQ_MODEL
         if self.api_key:
             logger.info("Configuring Groq API client...")
-            self.client = Groq(api_key=self.api_key)
+            self.client = AsyncGroq(api_key=self.api_key)
             logger.info(f"Groq API client configured successfully. Model: {self.model_name}")
         else:
             logger.warning("GROQ_API_KEY is not set. Chat requests will fail.")
             self.client = None
 
-    def generate_answer(self, question: str, context_chunks: list[dict]) -> dict:
+    @retry(
+        stop=stop_after_attempt(3),
+        wait=wait_exponential(multiplier=1, min=2, max=10),
+        reraise=True
+    )
+    async def _call_groq_api(self, messages: list) -> any:
+        logger.info(f"Sending API request to Groq using model '{self.model_name}'...")
+        return await self.client.chat.completions.create(
+            messages=messages,
+            model=self.model_name,
+        )
+
+    async def generate_answer(self, question: str, context_chunks: list[dict]) -> dict:
         if not self.client:
             return {
                 "answer": "Error: Groq API key is missing. Please add GROQ_API_KEY to your .env file.",
@@ -60,11 +73,7 @@ class ChatService:
         ]
         
         try:
-            logger.info(f"Sending prompt to Groq API using model '{self.model_name}' for question: '{question[:50]}...'")
-            response = self.client.chat.completions.create(
-                messages=messages,
-                model=self.model_name,
-            )
+            response = await self._call_groq_api(messages)
             answer = response.choices[0].message.content if response.choices and response.choices[0].message.content else "No response generated."
             
             # Collate unique sources used in the retrieved context
@@ -93,3 +102,4 @@ class ChatService:
             }
 
 chat_service = ChatService()
+

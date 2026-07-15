@@ -49,7 +49,8 @@ export default function AuthScreen({ onAuthSuccess }) {
 
   return (
     <div className="auth-container">
-      <div className="auth-background-glow"></div>
+      <div className="bg-glow orb-1"></div>
+      <div className="bg-glow orb-2"></div>
       <div className="auth-card glass-panel">
         <div className="auth-header">
           <div className="auth-logo">
