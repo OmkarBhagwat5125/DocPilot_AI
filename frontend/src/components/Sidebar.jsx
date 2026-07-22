@@ -1,6 +1,5 @@
 import React, { useRef, useState } from 'react'
 import { 
-  Sparkles, 
   Upload, 
   FileText, 
   Trash2, 
@@ -10,6 +9,7 @@ import {
   FileCode,
   FileSpreadsheet
 } from 'lucide-react'
+import Logo from './Logo'
 import './Sidebar.css'
 
 export default function Sidebar({ 
@@ -71,15 +71,30 @@ export default function Sidebar({
     if (ext === 'csv') return <FileSpreadsheet className="file-icon csv" size={18} />
     if (ext === 'txt') return <FileText className="file-icon txt" size={18} />
     if (ext === 'docx') return <FileCode className="file-icon docx" size={18} />
+    if (ext === 'pdf') return <FileText className="file-icon pdf" size={18} />
+    if (ext === 'pptx') return <FileText className="file-icon pptx" size={18} />
     return <FileText className="file-icon default" size={18} />
   }
 
+  const getBorderClass = (filename) => {
+    const ext = filename.split('.').pop().toLowerCase()
+    if (ext === 'pdf') return 'doc-border-pdf'
+    if (ext === 'docx') return 'doc-border-docx'
+    if (ext === 'csv') return 'doc-border-csv'
+    if (ext === 'txt') return 'doc-border-txt'
+    if (ext === 'pptx') return 'doc-border-pptx'
+    return 'doc-border-default'
+  }
+
+  const storagePercentage = Math.min((documents.length / 10) * 100, 100)
+
   return (
-    <div className="sidebar glass-panel">
+    <div className="sidebar">
       <div className="sidebar-header">
         <div className="sidebar-logo">
-          <Sparkles className="logo-sparkle" />
-          <h2 className="gradient-text">DocPilot AI</h2>
+          <Logo size={24} className="logo-icon" />
+          <h2 className="sidebar-title gradient-text">DocPilot AI</h2>
+          <span className="version-badge">v2.0</span>
         </div>
       </div>
 
@@ -105,8 +120,8 @@ export default function Sidebar({
           />
           {isUploading ? (
             <div className="upload-state">
-              <Loader2 className="spinner loader" />
-              <p>Processing & Indexing...</p>
+              <Loader2 className="spinner loader" size={28} />
+              <p className="primary-text">Processing & Indexing...</p>
             </div>
           ) : (
             <div className="upload-state">
@@ -129,6 +144,12 @@ export default function Sidebar({
           <h3>My Knowledge Base</h3>
           <span className="doc-count">{documents.length}</span>
         </div>
+        <div className="storage-bar-container">
+          <div 
+            className="storage-bar-fill" 
+            style={{ width: `${storagePercentage}%` }}
+          ></div>
+        </div>
         <div className="documents-list">
           {documents.length === 0 ? (
             <div className="empty-docs">
@@ -136,7 +157,7 @@ export default function Sidebar({
             </div>
           ) : (
             documents.map((doc, idx) => (
-              <div key={idx} className="document-card glass-panel" id={`doc-card-${idx}`}>
+              <div key={idx} className={`document-card ${getBorderClass(doc)}`} id={`doc-card-${idx}`}>
                 <div className="doc-meta">
                   {getFileIcon(doc)}
                   <span className="doc-name" title={doc}>{doc}</span>
@@ -164,7 +185,7 @@ export default function Sidebar({
             <p className="user-email" title={userEmail}>{userEmail}</p>
           </div>
         </div>
-        <button id="signout-button" className="btn btn-secondary btn-signout" onClick={onSignOut}>
+        <button id="signout-button" className="btn-signout" onClick={onSignOut}>
           <LogOut size={16} />
           <span>Sign Out</span>
         </button>

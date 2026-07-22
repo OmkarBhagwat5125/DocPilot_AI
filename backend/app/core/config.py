@@ -21,12 +21,20 @@ class Settings:
     
     QDRANT_COLLECTION: str = os.getenv("QDRANT_COLLECTION", "docpilot_docs")
     UPLOAD_DIR: str = os.getenv("UPLOAD_DIR", "uploads")
+    PORT: int = int(os.getenv("PORT", "8000"))
     
-    CORS_ORIGINS: list = [
-        "http://localhost:3000",
-        "http://localhost:5173",
-        "http://127.0.0.1:3000",
-        "http://127.0.0.1:5173"
-    ]
+    @property
+    def CORS_ORIGINS(self) -> list:
+        """Read CORS origins from environment variable (comma-separated) with localhost fallbacks."""
+        env_origins = os.getenv("CORS_ORIGINS", "")
+        origins = [o.strip() for o in env_origins.split(",") if o.strip()] if env_origins else []
+        # Always include localhost for development
+        default_origins = [
+            "http://localhost:3000",
+            "http://localhost:5173",
+            "http://127.0.0.1:3000",
+            "http://127.0.0.1:5173"
+        ]
+        return list(set(origins + default_origins))
 
 settings = Settings()

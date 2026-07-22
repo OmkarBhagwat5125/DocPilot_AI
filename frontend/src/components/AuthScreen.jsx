@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { supabase } from '../lib/supabase'
-import { Sparkles, Mail, Lock, Loader2, ArrowRight } from 'lucide-react'
+import { Mail, Lock, Loader2, ArrowRight, Zap, Layers, Shield } from 'lucide-react'
+import Logo from './Logo'
 import './AuthScreen.css'
 
 export default function AuthScreen({ onAuthSuccess }) {
@@ -49,22 +50,41 @@ export default function AuthScreen({ onAuthSuccess }) {
 
   return (
     <div className="auth-container">
+      <div className="noise-overlay"></div>
+      <div className="auth-mesh-bg"></div>
       <div className="bg-glow orb-1"></div>
       <div className="bg-glow orb-2"></div>
+      <div className="bg-glow orb-3"></div>
+      
       <div className="auth-card glass-panel">
         <div className="auth-header">
           <div className="auth-logo">
-            <Sparkles className="logo-icon" />
-            <h1 className="gradient-text">DocPilot AI</h1>
+            <Logo size={36} />
+            <h1 className="gradient-text font-heading">DocPilot AI</h1>
           </div>
           <p className="auth-tagline">Upload. Ask. Understand.</p>
+          
+          <div className="feature-badges">
+            <div className="feature-badge">
+              <Zap size={14} className="badge-icon accent-emerald" />
+              <span>RAG-Powered</span>
+            </div>
+            <div className="feature-badge">
+              <Layers size={14} className="badge-icon accent-cyan" />
+              <span>Multi-Format</span>
+            </div>
+            <div className="feature-badge">
+              <Shield size={14} className="badge-icon primary-color" />
+              <span>Secure</span>
+            </div>
+          </div>
         </div>
 
         <form onSubmit={handleSubmit} className="auth-form" id="auth-form-submit">
           <div className="input-group">
             <label htmlFor="auth-email">Email Address</label>
             <div className="input-wrapper">
-              <Mail className="input-icon" />
+              <Mail className="input-icon" size={18} />
               <input
                 id="auth-email"
                 type="email"
@@ -80,7 +100,7 @@ export default function AuthScreen({ onAuthSuccess }) {
           <div className="input-group">
             <label htmlFor="auth-password">Password</label>
             <div className="input-wrapper">
-              <Lock className="input-icon" />
+              <Lock className="input-icon" size={18} />
               <input
                 id="auth-password"
                 type="password"
@@ -102,15 +122,15 @@ export default function AuthScreen({ onAuthSuccess }) {
           <button
             id="auth-submit-btn"
             type="submit"
-            className="btn btn-primary auth-submit-btn"
+            className="auth-submit-btn"
             disabled={isLoading}
           >
             {isLoading ? (
-              <Loader2 className="spinner" />
+              <Loader2 className="spinner" size={20} />
             ) : (
               <>
                 {isSignUp ? 'Create Account' : 'Sign In'}
-                <ArrowRight size={16} />
+                <ArrowRight size={18} />
               </>
             )}
           </button>
@@ -122,6 +142,7 @@ export default function AuthScreen({ onAuthSuccess }) {
             <button
               id="auth-toggle-mode"
               className="auth-toggle-link"
+              type="button"
               onClick={() => {
                 setIsSignUp(!isSignUp)
                 setErrorMsg('')

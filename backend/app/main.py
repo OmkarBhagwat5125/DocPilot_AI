@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 app = FastAPI(
     title="DocPilot AI API",
     description="Backend API for DocPilot AI document intelligence system",
-    version="1.0.0"
+    version="2.0.0"
 )
 
 # Set CORS origins
@@ -34,6 +34,7 @@ app.include_router(api_router)
 @app.on_event("startup")
 async def startup_event():
     logger.info("Starting up DocPilot AI FastAPI Backend...")
+    logger.info(f"CORS Origins configured: {settings.CORS_ORIGINS}")
     
     # Create upload directories
     upload_dir = Path(settings.UPLOAD_DIR)
@@ -45,5 +46,9 @@ async def root_endpoint():
     return {
         "status": "ok",
         "service": "DocPilot AI API",
-        "version": "1.0.0"
+        "version": "2.0.0"
     }
+
+@app.get("/health")
+async def health_check():
+    return {"status": "healthy", "service": "DocPilot AI API"}

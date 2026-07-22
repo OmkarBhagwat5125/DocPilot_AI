@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react'
-import { Send, Bot, User, Sparkles, FileText, Check } from 'lucide-react'
+import { Send, Bot, User, Sparkles, FileText, Check, Copy } from 'lucide-react'
+import Logo from './Logo'
 import './ChatArea.css'
 
 export default function ChatArea({ 
@@ -10,6 +11,7 @@ export default function ChatArea({
 }) {
   const [input, setInput] = useState('')
   const [selectedCitation, setSelectedCitation] = useState(null)
+  const [copiedIndex, setCopiedIndex] = useState(null)
   const messagesEndRef = useRef(null)
   const inputRef = useRef(null)
 
@@ -39,6 +41,36 @@ export default function ChatArea({
     }
   }
 
+  const handleCopy = (text, index) => {
+    navigator.clipboard.writeText(text)
+    setCopiedIndex(index)
+    setTimeout(() => {
+      setCopiedIndex(null)
+    }, 2000)
+  }
+
+  const renderContent = (text) => {
+    if (!text) return null
+    
+    const lines = text.split('\n')
+    return lines.map((line, i) => {
+      const parts = line.split(/(\*\*.*?\*\*|`.*?`)/g)
+      return (
+        <React.Fragment key={i}>
+          {parts.map((part, j) => {
+            if (part.startsWith('**') && part.endsWith('**')) {
+              return <strong key={j}>{part.slice(2, -2)}</strong>
+            } else if (part.startsWith('`') && part.endsWith('`')) {
+              return <code key={j}>{part.slice(1, -1)}</code>
+            }
+            return <span key={j}>{part}</span>
+          })}
+          {i < lines.length - 1 && <br />}
+        </React.Fragment>
+      )
+    })
+  }
+
   // Format date/timestamp
   const formatTime = (dateObj) => {
     if (!dateObj) return ''
@@ -48,11 +80,11 @@ export default function ChatArea({
 
   return (
     <div className="chat-area">
-      <div className="chat-header glass-panel">
+      <div className="chat-header">
         <div className="chat-title-info">
           <h2>Conversation</h2>
           <div className="status-indicator">
-            <span className="dot animate-pulse"></span>
+            <span className="dot"></span>
             <p>{documentCount > 0 ? `${documentCount} Documents Indexed` : 'Waiting for Documents'}</p>
           </div>
         </div>
@@ -61,18 +93,40 @@ export default function ChatArea({
       <div className="chat-messages-container">
         {messages.length === 0 ? (
           <div className="chat-empty-state">
-            <div className="empty-graphic">
-              <Bot size={48} className="empty-icon animate-float" />
-              <Sparkles size={24} className="sparkle-icon" />
+            <Logo size={56} className="empty-logo animate-float" />
+            <h2 className="font-heading">Welcome to DocPilot AI</h2>
+            <p className="text-secondary">Upload a document in the sidebar to populate your knowledge base, then start asking questions below.</p>
+            
+            <div className="feature-cards-grid">
+              <div className="feature-card">
+                <FileText className="feature-card-icon" />
+                <h4>Multi-Format Upload</h4>
+                <p>Support for PDFs, Word, text, and more.</p>
+              </div>
+              <div className="feature-card">
+                <Bot className="feature-card-icon" />
+                <h4>Contextual AI</h4>
+                <p>Get intelligent answers based strictly on your files.</p>
+              </div>
+              <div className="feature-card">
+                <Check className="feature-card-icon" />
+                <h4>Verified Citations</h4>
+                <p>Every claim backed by exact source page references.</p>
+              </div>
             </div>
-            <h2>Welcome to DocPilot AI</h2>
-            <p>Upload a document in the sidebar to populate your knowledge base, then start asking questions below.</p>
+
             <div className="example-queries">
               <div className="query-pill" onClick={() => setInput('Summarize the main points of the uploaded document.')}>
                 "Summarize the main points..."
               </div>
               <div className="query-pill" onClick={() => setInput('What is the main objective or vision described?')}>
                 "What is the main vision described?"
+              </div>
+              <div className="query-pill" onClick={() => setInput('List all key findings and recommendations')}>
+                "List all key findings and recommendations"
+              </div>
+              <div className="query-pill" onClick={() => setInput('Compare the different sections discussed')}>
+                "Compare the different sections discussed"
               </div>
             </div>
           </div>
@@ -87,9 +141,18 @@ export default function ChatArea({
                     <div className="bot-avatar"><Bot size={16} /></div>
                   )}
                 </div>
-                <div className="message-bubble glass-panel">
+                <div className="message-bubble">
+                  {msg.role === 'assistant' && (
+                    <button 
+                      className={`copy-btn ${copiedIndex === index ? 'copied' : ''}`}
+                      onClick={() => handleCopy(msg.content, index)}
+                      title="Copy message"
+                    >
+                      {copiedIndex === index ? <Check size={14} /> : <Copy size={14} />}
+                    </button>
+                  )}
                   <div className="message-content">
-                    {msg.content}
+                    {renderContent(msg.content)}
                   </div>
                   
                   {/* Citations block */}
@@ -125,7 +188,7 @@ export default function ChatArea({
                 <div className="avatar-wrapper">
                   <div className="bot-avatar"><Bot size={16} /></div>
                 </div>
-                <div className="message-bubble glass-panel loading-bubble">
+                <div className="message-bubble loading-bubble">
                   <div className="typing-indicator">
                     <span></span>
                     <span></span>
@@ -139,7 +202,7 @@ export default function ChatArea({
         )}
       </div>
 
-      <div className="chat-input-wrapper glass-panel">
+      <div className="chat-input-wrapper">
         <form onSubmit={handleSend} className="chat-input-form" id="chat-input-form-element">
           <textarea
             id="chat-textarea-input"
@@ -155,7 +218,7 @@ export default function ChatArea({
           <button
             id="chat-send-btn"
             type="submit"
-            className="btn btn-primary send-btn"
+            className="send-btn"
             disabled={!input.trim() || isLoading || documentCount === 0}
             title="Send Message"
           >

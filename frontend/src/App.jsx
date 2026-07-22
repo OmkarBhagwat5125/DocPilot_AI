@@ -3,6 +3,7 @@ import { supabase } from './lib/supabase'
 import AuthScreen from './components/AuthScreen'
 import Sidebar from './components/Sidebar'
 import ChatArea from './components/ChatArea'
+import Logo from './components/Logo'
 import * as api from './lib/api'
 import './App.css'
 
@@ -128,9 +129,18 @@ export default function App() {
 
   if (isInitializing) {
     return (
-      <div className="init-loader-container" style={{display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', backgroundColor: '#09090e', color: '#f8fafc'}}>
-        <div className="init-spinner" style={{width: '40px', height: '40px', border: '3px solid rgba(255, 255, 255, 0.05)', borderTopColor: '#6366f1', borderRadius: '50%', animation: 'spin 1s linear infinite'}}></div>
-        <p style={{marginTop: '16px', fontSize: '14px', color: '#94a3b8'}}>Loading DocPilot AI...</p>
+      <div className="init-loader-container">
+        <div className="bg-glow orb-1"></div>
+        <div className="bg-glow orb-2"></div>
+        <div className="init-logo-wrapper">
+          <Logo size={48} />
+          <h2>DocPilot AI</h2>
+        </div>
+        <div className="init-progress-bar">
+          <div className="init-progress-fill"></div>
+        </div>
+        <p>Initializing your workspace...</p>
+        <div className="noise-overlay"></div>
       </div>
     )
   }
@@ -143,6 +153,8 @@ export default function App() {
     <div className="app-container">
       <div className="bg-glow orb-1"></div>
       <div className="bg-glow orb-2"></div>
+      <div className="bg-glow orb-3"></div>
+      <div className="noise-overlay"></div>
       <Sidebar
         documents={documents}
         onUpload={handleUpload}

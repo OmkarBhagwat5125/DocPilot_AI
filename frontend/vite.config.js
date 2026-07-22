@@ -7,8 +7,13 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 export default defineConfig({
   plugins: [react()],
-  envDir: path.resolve(__dirname, '../'), // Load environment variables from project root (.env)
+  envDir: path.resolve(__dirname, '../'), // Load env vars from project root (.env)
   server: {
     port: 3000
+  },
+  build: {
+    outDir: 'dist',
+    sourcemap: false
   }
 })
+
