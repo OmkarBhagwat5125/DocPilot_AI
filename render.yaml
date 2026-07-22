@@ -25,6 +25,6 @@ services:
       - key: QDRANT_COLLECTION
         value: docpilot_docs
       - key: CORS_ORIGINS
-        sync: false
+        value: https://doc-pilot-ai-lake.vercel.app
       - key: UPLOAD_DIR
         value: uploads
