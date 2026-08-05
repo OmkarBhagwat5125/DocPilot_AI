@@ -1,0 +1,225 @@
+.view-doc-panel {
+  width: 420px;
+  min-width: 420px;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-surface);
+  border-left: 1px solid var(--border-subtle);
+  animation: slideFromRight var(--transition-panel) ease-out;
+  position: relative;
+  z-index: 5;
+}
+
+.view-doc-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-subtle);
+  gap: 12px;
+}
+
+.view-doc-file-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+}
+
+.view-doc-file-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--brand-primary);
+  flex-shrink: 0;
+}
+
+.view-doc-filename {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.view-doc-page-label {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.view-doc-header-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.view-doc-header-btn {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+}
+
+.view-doc-header-btn:hover {
+  background: var(--bg-subtle);
+  color: var(--text-primary);
+}
+
+.view-doc-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px 20px;
+}
+
+.view-doc-source-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+  font-weight: 600;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.view-doc-excerpt {
+  background: rgba(6, 182, 212, 0.08);
+  border-left: 3px solid var(--brand-accent);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  padding: 16px;
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--text-primary);
+  white-space: pre-wrap;
+}
+
+.view-doc-meta {
+  margin-top: 16px;
+  display: flex;
+  gap: 12px;
+}
+
+.view-doc-meta-chip {
+  font-size: 11px;
+  color: var(--text-muted);
+  background: var(--bg-subtle);
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.view-doc-footer {
+  padding: 16px 20px;
+  border-top: 1px solid var(--border-subtle);
+  display: flex;
+  gap: 8px;
+}
+
+.view-doc-action-btn {
+  flex: 1;
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  font-family: var(--font-body);
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-surface);
+  color: var(--text-secondary);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.view-doc-action-btn:hover:not(:disabled) {
+  background: var(--bg-subtle);
+  border-color: var(--brand-primary);
+  color: var(--brand-primary);
+}
+
+.view-doc-action-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.view-doc-action-btn.primary {
+  background: var(--citation-chip-bg);
+  color: var(--citation-chip-text);
+  border-color: transparent;
+}
+
+.view-doc-action-btn.primary:hover {
+  background: rgba(79, 70, 229, 0.15);
+}
+
+.view-doc-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  text-align: center;
+  padding: 40px;
+  color: var(--text-muted);
+}
+
+.view-doc-empty-icon {
+  width: 48px;
+  height: 48px;
+  color: var(--border-subtle);
+  margin-bottom: 16px;
+}
+
+.view-doc-empty p {
+  font-size: 14px;
+  color: var(--text-muted);
+  max-width: 240px;
+  line-height: 1.5;
+}
+
+/* Keyboard shortcut hint */
+.view-doc-shortcut {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 8px;
+}
+
+.view-doc-shortcut kbd {
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-subtle);
+  border-radius: 4px;
+  padding: 1px 5px;
+  font-size: 10px;
+  font-family: var(--font-mono);
+}
+
+@media (max-width: 768px) {
+  .view-doc-panel {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    min-width: 100%;
+    height: 100%;
+    border-left: none;
+    z-index: 100;
+  }
+}

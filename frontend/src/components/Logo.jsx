@@ -12,8 +12,8 @@ const Logo = ({ size = 32, className = '' }) => {
     >
       <defs>
         <linearGradient id="logo-gradient" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#6366f1" />
-          <stop offset="1" stopColor="#a855f7" />
+          <stop stopColor="#6366F1" />
+          <stop offset="1" stopColor="#06B6D4" />
         </linearGradient>
         <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
           <feGaussianBlur stdDeviation="1.5" result="blur" />

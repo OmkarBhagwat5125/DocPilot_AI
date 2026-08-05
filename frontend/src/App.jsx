@@ -4,6 +4,7 @@ import AuthScreen from './components/AuthScreen'
 import Sidebar from './components/Sidebar'
 import ChatArea from './components/ChatArea'
 import Logo from './components/Logo'
+import ViewDocumentPanel from './components/ViewDocumentPanel'
 import * as api from './lib/api'
 import './App.css'
 
@@ -12,6 +13,8 @@ export default function App() {
   const [documents, setDocuments] = useState([])
   const [messages, setMessages] = useState([])
   
+  const [viewDocPanel, setViewDocPanel] = useState({ isOpen: false, source: null })
+
   // Loading states
   const [isUploading, setIsUploading] = useState(false)
   const [isQuerying, setIsQuerying] = useState(false)
@@ -46,6 +49,17 @@ export default function App() {
       setMessages([])
     }
   }, [session])
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'd') {
+        e.preventDefault()
+        setViewDocPanel(prev => ({ ...prev, isOpen: !prev.isOpen }))
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [])
 
   const loadDocuments = async () => {
     if (!session) return
@@ -127,11 +141,21 @@ export default function App() {
     setSession(null)
   }
 
+  const handleCitationClick = (source) => {
+    setViewDocPanel({ isOpen: true, source })
+  }
+  
+  const handleClosePanel = () => {
+    setViewDocPanel({ isOpen: false, source: null })
+  }
+
+  const handleNewChat = () => {
+    setMessages([])
+  }
+
   if (isInitializing) {
     return (
       <div className="init-loader-container">
-        <div className="bg-glow orb-1"></div>
-        <div className="bg-glow orb-2"></div>
         <div className="init-logo-wrapper">
           <Logo size={48} />
           <h2>DocPilot AI</h2>
@@ -140,7 +164,6 @@ export default function App() {
           <div className="init-progress-fill"></div>
         </div>
         <p>Initializing your workspace...</p>
-        <div className="noise-overlay"></div>
       </div>
     )
   }
@@ -151,10 +174,6 @@ export default function App() {
 
   return (
     <div className="app-container">
-      <div className="bg-glow orb-1"></div>
-      <div className="bg-glow orb-2"></div>
-      <div className="bg-glow orb-3"></div>
-      <div className="noise-overlay"></div>
       <Sidebar
         documents={documents}
         onUpload={handleUpload}
@@ -162,13 +181,22 @@ export default function App() {
         onSignOut={handleSignOut}
         isUploading={isUploading}
         userEmail={session.user?.email || 'User'}
+        onNewChat={handleNewChat}
       />
       <ChatArea
         messages={messages}
         onSendMessage={handleSendMessage}
         isLoading={isQuerying}
         documentCount={documents.length}
+        onCitationClick={handleCitationClick}
       />
+      {viewDocPanel.isOpen && (
+        <ViewDocumentPanel
+          source={viewDocPanel.source}
+          onClose={handleClosePanel}
+          session={session}
+        />
+      )}
     </div>
   )
 }

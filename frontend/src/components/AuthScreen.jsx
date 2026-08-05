@@ -50,13 +50,7 @@ export default function AuthScreen({ onAuthSuccess }) {
 
   return (
     <div className="auth-container">
-      <div className="noise-overlay"></div>
-      <div className="auth-mesh-bg"></div>
-      <div className="bg-glow orb-1"></div>
-      <div className="bg-glow orb-2"></div>
-      <div className="bg-glow orb-3"></div>
-      
-      <div className="auth-card glass-panel">
+      <div className="auth-card">
         <div className="auth-header">
           <div className="auth-logo">
             <Logo size={36} />

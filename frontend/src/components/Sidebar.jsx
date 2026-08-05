@@ -7,7 +7,8 @@ import {
   Loader2, 
   CheckCircle,
   FileCode,
-  FileSpreadsheet
+  FileSpreadsheet,
+  MessageSquarePlus
 } from 'lucide-react'
 import Logo from './Logo'
 import './Sidebar.css'
@@ -16,7 +17,8 @@ export default function Sidebar({
   documents = [], 
   onUpload, 
   onDelete, 
-  onSignOut, 
+  onSignOut,
+  onNewChat,
   isUploading = false,
   userEmail = ''
 }) {
@@ -88,14 +90,21 @@ export default function Sidebar({
 
   const storagePercentage = Math.min((documents.length / 10) * 100, 100)
 
+  // Collapses to icon rail on mobile
   return (
     <div className="sidebar">
       <div className="sidebar-header">
         <div className="sidebar-logo">
           <Logo size={24} className="logo-icon" />
           <h2 className="sidebar-title gradient-text">DocPilot AI</h2>
-          <span className="version-badge">v2.0</span>
         </div>
+      </div>
+
+      <div className="new-chat-section">
+        <button className="new-chat-btn" onClick={onNewChat}>
+          <MessageSquarePlus size={16} />
+          New Chat
+        </button>
       </div>
 
       <div className="upload-section">
@@ -174,6 +183,11 @@ export default function Sidebar({
             ))
           )}
         </div>
+      </div>
+
+      <div className="recent-chats-section">
+        <h3>Recent</h3>
+        <p className="empty-recent">No recent conversations</p>
       </div>
 
       <div className="sidebar-footer">
