@@ -1,6 +1,5 @@
 import logging
-import google.generativeai as genai
-from google.generativeai.types import generation_types
+from groq import AsyncGroq, APIConnectionError, APIStatusError, AuthenticationError, RateLimitError
 from backend.app.core.config import settings
 
 logger = logging.getLogger(__name__)
@@ -14,16 +13,23 @@ class ChatServiceError(Exception):
 
 class ChatService:
     def __init__(self):
-        self.api_key = settings.GEMINI_API_KEY
-        self.model_name = "gemini-1.5-flash"
+        self.api_key = settings.GROQ_API_KEY
+        self.model_name = settings.GROQ_MODEL
         if self.api_key:
-            logger.info("Configuring Gemini API client...")
-            genai.configure(api_key=self.api_key)
-            self.client = genai.GenerativeModel(self.model_name)
-            logger.info(f"Gemini API client configured successfully. Model: {self.model_name}")
+            logger.info("Configuring Groq API client...")
+            # The SDK retries transient failures, but never invalid credentials.
+            self.client = AsyncGroq(api_key=self.api_key, timeout=30.0, max_retries=2)
+            logger.info(f"Groq API client configured successfully. Model: {self.model_name}")
         else:
-            logger.warning("GEMINI_API_KEY is not set. Chat requests will fail.")
+            logger.warning("GROQ_API_KEY is not set. Chat requests will fail.")
             self.client = None
+
+    async def _call_groq_api(self, messages: list) -> any:
+        logger.info(f"Sending API request to Groq using model '{self.model_name}'...")
+        return await self.client.chat.completions.create(
+            messages=messages,
+            model=self.model_name,
+        )
 
     async def generate_answer(self, question: str, context_chunks: list[dict]) -> dict:
         if not context_chunks:
@@ -34,7 +40,7 @@ class ChatService:
 
         if not self.client:
             raise ChatServiceError(
-                "Gemini is not configured. Set GEMINI_API_KEY in the backend environment "
+                "Groq is not configured. Set GROQ_API_KEY in the backend environment "
                 "(the root .env file for local development), then restart the backend."
             )
 
@@ -57,12 +63,20 @@ class ChatService:
             "5. Never make up or hallucinate information."
         )
         
-        prompt = f"{system_instruction}\n\nDOCUMENT CONTEXT:\n{context_text}\n\nUSER QUESTION: {question}"
+        messages = [
+            {
+                "role": "system",
+                "content": system_instruction
+            },
+            {
+                "role": "user",
+                "content": f"DOCUMENT CONTEXT:\n{context_text}\n\nUSER QUESTION: {question}"
+            }
+        ]
         
         try:
-            logger.info(f"Sending API request to Gemini using model '{self.model_name}'...")
-            response = await self.client.generate_content_async(prompt)
-            answer = response.text if response.text else "No response generated."
+            response = await self._call_groq_api(messages)
+            answer = response.choices[0].message.content if response.choices and response.choices[0].message.content else "No response generated."
             
             # Collate unique sources used in the retrieved context
             unique_sources = []
@@ -82,18 +96,23 @@ class ChatService:
                 "answer": answer,
                 "sources": unique_sources
             }
-        except generation_types.BlockedPromptException as e:
-            logger.error("Gemini blocked the prompt.")
-            raise ChatServiceError("The prompt was blocked by safety settings.", 400) from e
-        except Exception as e:
-            logger.error(f"Gemini API request failed: {str(e)}")
-            if "API_KEY_INVALID" in str(e) or "401" in str(e) or "403" in str(e):
-                raise ChatServiceError(
-                    "Gemini rejected the backend API key. Replace GEMINI_API_KEY with a valid "
-                    "key in the backend environment, then restart.", 401
-                ) from e
-            if "429" in str(e):
-                raise ChatServiceError("Gemini's rate limit was reached. Please try again later.", 429) from e
-            raise ChatServiceError("Unable to reach Gemini or complete the request. Please try again shortly.") from e
+        except AuthenticationError as e:
+            logger.error("Groq rejected the configured API key (401).")
+            raise ChatServiceError(
+                "Groq rejected the backend API key. Replace GROQ_API_KEY with a valid "
+                "key in the backend environment (the root .env file locally), then "
+                "restart or redeploy the backend."
+            ) from e
+        except RateLimitError as e:
+            raise ChatServiceError("Groq's rate limit was reached. Please try again later.", 429) from e
+        except APIConnectionError as e:
+            raise ChatServiceError("Unable to reach Groq. Please try again shortly.") from e
+        except APIStatusError as e:
+            logger.error("Groq request failed with status %s", e.status_code)
+            raise ChatServiceError(
+                "Groq could not complete the request. Check the backend GROQ_MODEL "
+                "setting and provider availability.", 502
+            ) from e
 
 chat_service = ChatService()
+
