@@ -1,4 +1,5 @@
 import logging
+from typing import BinaryIO
 from supabase import create_client, Client
 from backend.app.core.config import settings
 
@@ -25,7 +26,7 @@ class StorageService:
         except Exception as e:
             logger.warning(f"Could not verify/create bucket '{self.bucket_name}': {str(e)}")
 
-    def upload_file(self, user_id: str, filename: str, file_content: bytes) -> str:
+    def upload_file(self, user_id: str, filename: str, file_content: bytes | BinaryIO) -> str:
         file_path = f"{user_id}/{filename}"
         try:
             logger.info(f"Uploading file {filename} to Supabase storage path: {file_path}")

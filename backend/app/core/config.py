@@ -22,6 +22,10 @@ class Settings:
     QDRANT_COLLECTION: str = os.getenv("QDRANT_COLLECTION", "docpilot_docs")
     UPLOAD_DIR: str = os.getenv("UPLOAD_DIR", "uploads")
     PORT: int = int(os.getenv("PORT", "8000"))
+    # Conservative defaults for small hosting instances.
+    EMBEDDING_BATCH_SIZE: int = max(1, int(os.getenv("EMBEDDING_BATCH_SIZE", "4")))
+    EMBEDDING_THREADS: int = max(1, int(os.getenv("EMBEDDING_THREADS", "1")))
+    MAX_UPLOAD_MB: int = max(1, int(os.getenv("MAX_UPLOAD_MB", "10")))
     
     @property
     def CORS_ORIGINS(self) -> list:

@@ -213,4 +213,29 @@ Run the offline chat regression tests from the project root:
 python -m unittest discover -s backend/tests -v
 ```
 
+### Render memory limits
+
+For a small instance, use one Uvicorn worker and the defaults now configured in
+`render.yaml`: `EMBEDDING_BATCH_SIZE=4`, `EMBEDDING_THREADS=1`, `MAX_UPLOAD_MB=10`,
+`TOKENIZERS_PARALLELISM=false`, and `OMP_NUM_THREADS=1`. For a manually created
+Render service, set these in its Environment page and add `--workers 1` to the
+start command. Multiple workers each load their own embedding model.
+
+Uploads are copied to disk in 1 MB blocks and sent to storage as a file stream.
+PDF text is processed page by page. Chunks are embedded and written to Qdrant in
+small batches instead of retaining all vectors in memory. CSV parsing uses the
+standard library, preserving textual values such as leading zeros without
+loading pandas. Other parsers are imported only when their format is used.
+
+These changes reduce memory peaks but do not guarantee that the application fits
+in 512 MB: the embedding runtime and local Qdrant still consume memory, and parsed
+or compressed documents can expand beyond their uploaded size. Use Qdrant Cloud
+for hosted persistent indexes, then check Render's memory metrics during a real
+upload and query. If model initialization still exceeds the limit, use a larger
+RAM instance or move embedding inference to a separate service. Changing only
+the Groq model does not remove the local embedding model.
+
+If indexing fails after some batches have been written, those chunks may remain.
+Delete that document before retrying the upload to avoid duplicate chunks.
+
 

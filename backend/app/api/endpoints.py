@@ -1,6 +1,6 @@
 import os
-import shutil
 import logging
+from contextlib import closing
 from pathlib import Path
 from fastapi import APIRouter, UploadFile, File, Depends, HTTPException, status
 from pydantic import BaseModel
@@ -13,8 +13,7 @@ from backend.app.services.storage import object_storage
 from backend.app.services.embedding import embedding_service
 from backend.app.services.vector_db import vector_db
 from backend.app.services.chat import chat_service, ChatServiceError
-
-from langchain_text_splitters import RecursiveCharacterTextSplitter
+from backend.app.services.ingestion import save_upload, index_pages
 
 logger = logging.getLogger(__name__)
 
@@ -63,52 +62,38 @@ async def upload_document(
     temp_file_path = temp_dir / f"{uuid4_filename(filename)}"
     
     try:
-        # Read file contents
-        content = await file.read()
-        
+        # Copy in bounded blocks rather than keeping the full upload in RAM.
+        await save_upload(file, temp_file_path, settings.MAX_UPLOAD_MB * 1024 * 1024)
+
         # 1. Upload to Supabase Storage first for cloud permanence (fallback gracefully if keys are invalid)
         try:
-            object_storage.upload_file(user_id, filename, content)
+            with temp_file_path.open("rb") as content:
+                object_storage.upload_file(user_id, filename, content)
         except Exception as upload_err:
             logger.warning(f"Supabase storage upload failed: {str(upload_err)}. Fallback to local parsing and vector indexing.")
             
-        # 2. Save locally temporarily to allow parser to access it via path
-        with open(temp_file_path, "wb") as f:
-            f.write(content)
-            
         # 3. Parse document
-        parsed_pages = parser.parse(str(temp_file_path), filename)
-        if not parsed_pages:
+        # Close the page iterator even when indexing fails, releasing the PDF
+        # handle before the temporary file is removed (also required on Windows).
+        with closing(parser.iter_pages(str(temp_file_path), filename)) as parsed_pages:
+            chunks_count = index_pages(
+                parsed_pages, user_id, embedding_service, vector_db,
+                settings.EMBEDDING_BATCH_SIZE,
+            )
+        if not chunks_count:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Document text could not be extracted or file is empty."
             )
-            
-        # 4. Chunk document text page-by-page
-        text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
-        chunks = []
-        for page in parsed_pages:
-            split_texts = text_splitter.split_text(page["text"])
-            for text_chunk in split_texts:
-                chunks.append({
-                    "text": text_chunk,
-                    "page_number": page["page_number"],
-                    "source": page["source"]
-                })
-                
-        # 5. Generate embeddings
-        chunk_texts = [c["text"] for c in chunks]
-        embeddings = embedding_service.embed_texts(chunk_texts)
-        
-        # 6. Store in Qdrant
-        vector_db.upsert_chunks(chunks, embeddings, user_id)
         
         return UploadResponse(
             filename=filename,
-            chunks_count=len(chunks),
+            chunks_count=chunks_count,
             message="Document successfully uploaded, parsed, and indexed."
         )
         
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error handling upload of {filename}: {str(e)}")
         raise HTTPException(
