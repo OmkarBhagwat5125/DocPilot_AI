@@ -192,4 +192,25 @@ UPLOAD_DIR=uploads
 
 4. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
+### Troubleshooting: Groq `401 Invalid API Key`
+
+This response means Groq rejected the backend's credential. Create a valid key at
+[Groq Console](https://console.groq.com/keys) and replace `GROQ_API_KEY` in the root
+`.env` file for local development, or in the backend hosting service's environment
+settings for deployment. Restart or redeploy the backend after changing it.
+The frontend's environment does not configure the backend's Groq client.
+
+Existing process environment variables take precedence over `.env`. If replacing
+the file's key does not help, check whether the shell or hosting service still sets
+an older `GROQ_API_KEY`. Never put this secret in a `VITE_` variable or commit it.
+
+The query API returns a service error for rejected backend credentials, rather
+than treating the provider error as a successful document answer.
+
+Run the offline chat regression tests from the project root:
+
+```bash
+python -m unittest discover -s backend/tests -v
+```
+
 

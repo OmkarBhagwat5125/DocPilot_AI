@@ -12,7 +12,7 @@ from backend.app.services.document_parser import DocumentParser
 from backend.app.services.storage import object_storage
 from backend.app.services.embedding import embedding_service
 from backend.app.services.vector_db import vector_db
-from backend.app.services.chat import chat_service
+from backend.app.services.chat import chat_service, ChatServiceError
 
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
@@ -142,6 +142,8 @@ async def query_documents(
             answer=res["answer"],
             sources=res["sources"]
         )
+    except ChatServiceError as e:
+        raise HTTPException(status_code=e.status_code, detail=str(e)) from e
     except Exception as e:
         logger.error(f"Error handling query: {str(e)}")
         raise HTTPException(
