@@ -238,4 +238,33 @@ the Groq model does not remove the local embedding model.
 If indexing fails after some batches have been written, those chunks may remain.
 Delete that document before retrying the upload to avoid duplicate chunks.
 
+### Automatically deploy GitHub changes to Render
+
+`render.yaml` explicitly selects `main` and `autoDeployTrigger: commit`, so a
+Blueprint-managed backend deploys when a commit is pushed or merged into `main`.
+
+For an existing service created manually, complete this one-time setup in Render:
+
+1. Open the backend service's **Settings** page and confirm its repository is
+   `OmkarBhagwat5125/DocPilot_AI` and its branch is `main`.
+2. Set **Auto-Deploy** to **On Commit** and save. If the repository was added by
+   public URL, connect your GitHub account and grant Render access to the repo
+   so it can receive push events.
+3. Commit and push your changes to `main`. Watch the service's **Events** page
+   for a deployment of that commit and wait for it to become **Live**.
+
+A manually created service does not apply `render.yaml` settings just because
+the file is in the repository. Its build command, start command and environment
+remain controlled by the Dashboard unless it is managed through a Blueprint.
+For an existing Blueprint, keep **Auto Sync** enabled to apply future changes to
+the Blueprint configuration as well as deploying code changes.
+
+Automatic deployment updates tracked source code. It does not upload the ignored
+local `.env` file or replace Render secrets. Maintain `GROQ_API_KEY` and Supabase
+credentials in the backend service's Environment settings. This configuration
+deploys the backend; the Vercel frontend uses its own Git integration.
+
+See [Render auto-deploy documentation](https://render.com/docs/deploys) and
+[the Blueprint specification](https://render.com/docs/blueprint-spec).
+
 
